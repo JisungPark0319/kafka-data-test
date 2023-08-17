@@ -26,6 +26,7 @@ func main() {
 	flag.StringVar(&topic, "topic", "test", "")
 	flag.IntVar(&partition, "partition", 1, "")
 	// producer mode 시 전송하기 위한 메시지 수 - 0인 경우 loop
+	// consumer mode 시 연결되는 consumer 수 - 0인 경우 partion 수만큼 생성
 	flag.IntVar(&count, "count", 1, "0: loop")
 	// message 데이터의 유형을 선택
 	flag.StringVar(&dataType, "data-type", "user", "")
@@ -46,10 +47,14 @@ func main() {
 		wg.Add(1)
 		go handler.ProducerHandler(&wg, brokerList, topic, count, dataType)
 	case "consumer":
-		// partition 개수와 동일한 consumer gorution 생성
-		routinCount, err := handler.GetPartition(brokerList, topic)
-		if err != nil {
-			logrus.Fatalf("error get partition - %v\n", err)
+		routinCount := count
+		if routinCount == 0 {
+			// partition 개수와 동일한 consumer gorution 생성
+			var err error
+			routinCount, err = handler.GetPartition(brokerList, topic)
+			if err != nil {
+				logrus.Fatalf("error get partition - %v\n", err)
+			}
 		}
 		wg.Add(routinCount)
 		for i := 0; i < routinCount; i++ {
