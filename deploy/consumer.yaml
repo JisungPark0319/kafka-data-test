@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kafka-consumer
+spec:
+  selector:
+    matchLabels:
+      app: kafka-consumer
+  template:
+    metadata:
+      labels:
+        app: kafka-consumer
+    spec:
+      containers:
+      - name: kafka-consumer
+        image: wltjd9870/kafka-cli:v0.0.6-no-print
+        resources:
+          limits:
+            memory: "500Mi"
+            cpu: "1000m"
+        command:
+        - kafka-client
+        - -mode=consumer
+        - -brokers=127.0.0.1:9092
+        - -topic=kafka-test-image
