@@ -27,16 +27,14 @@ func main() {
 	flag.IntVar(&partition, "partition", 1, "")
 	// producer mode 시 전송하기 위한 메시지 수 - 0인 경우 loop
 	// consumer mode 시 연결되는 consumer 수 - 0인 경우 partion 수만큼 생성
-	flag.IntVar(&count, "count", 1, "0: loop")
+	flag.IntVar(&count, "count", 0, "0: loop")
 	// message 데이터의 유형을 선택
 	flag.StringVar(&dataType, "data-type", "user", "")
 	flag.Parse()
 
-	brokerList := strings.Split(brokers, ",")
+	logrus.Infof("Starting mode: %s, broker address: %s\n", mode, brokers)
 
-	if !(mode == "consumer" || mode == "producer" || mode == "create") {
-		logrus.Fatalf("consumer | producer | create - %s\n", mode)
-	}
+	brokerList := strings.Split(brokers, ",")
 
 	var wg sync.WaitGroup
 	switch mode {
@@ -60,6 +58,8 @@ func main() {
 		for i := 0; i < routinCount; i++ {
 			go handler.ConsumerHandler(&wg, brokerList, topic, "consumer-test")
 		}
+	default:
+		logrus.Fatalf("consumer | producer | create - %s\n", mode)
 	}
 	wg.Wait()
 }
