@@ -28,7 +28,8 @@ func ProducerHandler(wg *sync.WaitGroup, brokers []string, topic string, count i
 
 	loopCount := 1
 	for {
-		latency := rand.Float64() * 100 * float64(time.Millisecond)
+		// 0 ~ 10ms마다 데이터 전송
+		latency := rand.Float64() * 10 * float64(time.Millisecond)
 
 		var genData any
 		if dataType == "image" {
@@ -48,7 +49,7 @@ func ProducerHandler(wg *sync.WaitGroup, brokers []string, topic string, count i
 
 		sendStartTime := time.Now()
 		if err := producer.SendMessage(context.Background(), message); err != nil {
-			logrus.Error("send fail")
+			logrus.Errorf("send fail - %v\n", err)
 		}
 		logrus.Infof("%d send data - latency: %v\n", loopCount, time.Since(sendStartTime))
 
